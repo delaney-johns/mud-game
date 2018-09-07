@@ -1,64 +1,90 @@
 package mud
 
 class Player {
+  //Sets initial room location and inventory.
   private var inventory = List[Item]()
   private var currentRoom = Room.rooms(0)
-  def processCommand(command: String): Unit = { command match {
-    case "north" => move("north")
-    case "south" => move("south")
-    case "east" => move("east")
-    case "west" => move("west")
-    case "up" => move("up")
-    case "down" => move("down")
-    case "look" => println(currentRoom.description)
-    case "inv" => println(inventoryListing())
-    case s if s.startsWith("get") => findItem(command.substring(4))
-    //substring for get item
-    //case drop item => dropItem(item) item :: Room
-    case "exit" => println("Leave the game.")
-    case "help" => println("north, south, east, west, up, down - moves your player.")
-      println("look - reprints the description of the current room")
-      println("inv - list the contents of your inventory")
-      println("get item - to get an item from the room and add it to your inventory")
-      println("drop item - to drop an item from your inventory into the room.")
-      println("exit - leave the game")
-      println("help - print the available commands and what they do.")
-    case _ => println("Not a valid command.")
+  //Processes the user's command and takes the appropriate action.
+  def processCommand(command: String): Unit = {
+    command match {
+      case "north" => move("north")
+      case "south" => move("south")
+      case "east" => move("east")
+      case "west" => move("west")
+      case "up" => move("up")
+      case "down" => move("down")
+      case "look" => println(currentRoom.description)
+      case "inv" => println(inventoryListing())
+      case s if s.startsWith("get") => findItem(command.substring(4))
+      case s if s.startsWith("drop") => addItemToRoom(dropItem(command.substring(5)))
+      case "exit" => println("Leave the game.")
+      case "help" =>
+        println("north, south, east, west, up, down - moves your player.")
+        println("look - reprints the description of the current room")
+        println("inv - list the contents of your inventory")
+        println("get item - to get an item from the room and add it to your inventory")
+        println("drop item - to drop an item from your inventory into the room.")
+        println("exit - leave the game")
+        println("help - print the available commands and what they do.")
+      case _ => println("Not a valid command.")
 
-    
+    }
   }
-  //parse/act on command  
-  }
+
+  //Finds an item out of the inventory (if the player has it) and returns the item.
   def getFromInventory(itemName: String): Option[Item] = {
-    val indexOfItem = inventory.indexWhere(_.name == itemName) 
+    val indexOfItem = inventory.indexWhere(_.name == itemName)
     if (indexOfItem > -1) Some(inventory(indexOfItem)) else None
   }
+
+  //Adds an item to a player's inventory.
   def addToInventory(item: Item): Unit = {
-    inventory ::= item 
+    inventory ::= item
   }
+
+  //Shows items in an inventory, if any.
   def inventoryListing(): String = {
-    if (inventory.isEmpty) "Items: None"
+    if (inventory.isEmpty) "Inventory:\nNone"
     else {
-      val inventoryDesc = for (items <- inventory) 
-        yield items.name + " - " + items.desc + "\n"
-    
-    "Inventory: " + inventoryDesc
+      var inventoryDesc = ""
+      for (items <- inventory)
+        inventoryDesc += items.name + " - " + items.desc + "\n"
+      "Inventory: \n" + inventoryDesc
     }
   }
-  
+
+  //Takes an item that the user typed and adds it to the player's
+  //inventory, if the item is in the current room.
   def findItem(itemFromCommand: String): Unit = {
     val gottenItem = currentRoom.getItem(itemFromCommand)
-    if (gottenItem != None) addToInventory(gottenItem.getOrElse(new Item("","")))
+    if (gottenItem != None) addToInventory(gottenItem.get)
   }
- 
-  
-  def move(dir: String): Unit = { 
-    val directionArray = Array("north","south", "east", "west", "up", "down")
+
+  //Takes an item that the user typed and removes it
+  //from the player's inventory.
+  def dropItem(itemFromCommand: String): Option[Item] = {
+    val indexOfItem = inventory.indexWhere(_.name == itemFromCommand)
+    if (indexOfItem > -1) {
+      val ret = Some(inventory(indexOfItem))
+      inventory = inventory.patch(indexOfItem, Nil, 1)
+      ret
+    } else None
+  }
+
+  //Takes an item and adds it to the current room.
+  def addItemToRoom(item: Option[Item]): Unit = {
+    if (item != None) currentRoom.dropItem(item.get)
+  }
+
+  //Takes a direction that the player typed in and
+  //moves the player to the room associated with that direction's exit.
+  def move(dir: String): Unit = {
+    val directionArray = Array("north", "south", "east", "west", "up", "down")
     val direction = directionArray.indexOf(dir)
     if (currentRoom.getExit(direction) != None) {
-      val newRoom = currentRoom.getExit(direction).getOrElse(new Room("", "", Array(), List()))
-    currentRoom = newRoom
+      val newRoom = currentRoom.getExit(direction).get
+      currentRoom = newRoom
     }
-    currentRoom.description
+    println(currentRoom.description)
   }
 }
