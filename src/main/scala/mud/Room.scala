@@ -6,7 +6,7 @@ class Room(
   //Sets the name, description, exits, and items in each room.
   name: String,
   desc: String,
-  exits: Array[Option[Int]],
+  exits: Array[Option[String]],
   private var items: List[Item]) {
 
   //Gets the room that is reached by going in a direction,
@@ -65,28 +65,31 @@ class Room(
 object Room {
   val rooms = readRooms()
 
-  //Array of rooms is created using map.txt file.
-  def readRooms(): Array[Room] = {
+  //Map of rooms is created using map.txt file.
+  def readRooms(): Map[String, Room] = {
     val source = Source.fromFile("map.txt")
     val lines = source.getLines()
-    val rooms = Array.fill(lines.next().trim().toInt)(readRoom(lines))
+    val rooms = Array.fill(lines.next().trim().toInt)(readRoom(lines)).toMap
     source.close
     rooms
   }
+ 
 
   //File of the map is used to determine number of room,
-  //name and description of room, possible exits, and items.
-  def readRoom(lines: Iterator[String]): Room = {
+  //name and description of room, possible exits, and items. 
+  //Map is created with room name and info.
+  def readRoom(lines: Iterator[String]): (String, Room) = {
     val number = lines.next()
     val name = lines.next()
     val desc = lines.next()
-    val exits = lines.next().split(",").map(_.trim.toInt).map(i => if (i == -1) None else Some(i))
+    val exits = lines.next().split(",").map(_.trim).map(i => if (i == "-1") None else Some(i))
     val items = List.fill(lines.next().trim.toInt) {
       val Array(name, desc) = lines.next().split(",", 2)
       Item(name.trim, desc.trim)
 
     }
-    new Room(name, desc, exits, items)
+    val r = new Room(name, desc, exits, items)
+    (name, r)
   }
 
 }

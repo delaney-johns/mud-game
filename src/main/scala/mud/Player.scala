@@ -3,7 +3,7 @@ package mud
 class Player {
   //Sets initial room location and inventory.
   private var inventory = List[Item]()
-  private var currentRoom = Room.rooms(0)
+  private var currentRoom = Room.rooms("Backyard porch")
   //Processes the user's command and takes the appropriate action.
   def processCommand(command: String): Unit = {
     command match {
