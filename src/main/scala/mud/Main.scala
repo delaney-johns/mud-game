@@ -1,21 +1,29 @@
 package mud
-import scala.io.StdIn._
+import scala.io.StdIn.readLine
+
+import akka.actor.ActorSystem
+import akka.actor.Props
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 //Creates a player and processes user input.
 object Main extends App {
-  println("Welcome to the game. Here are some helpful commands to get you started.")
-  println("north, south, east, west, up, down - moves your player.")
-  println("look - reprints the description of the current room")
-  println("inv - list the contents of your inventory")
-  println("get item - to get an item from the room and add it to your inventory")
-  println("drop item - to drop an item from your inventory into the room.")
-  println("exit - leave the game")
-  println("help - print the available commands and what they do.")
+  val system = ActorSystem("MUDSystem")
+  val playerManager = system.actorOf(Props[PlayerManager], "PlayerManagerActor")
+  val roomManager = system.actorOf(Props[RoomManager], "RoomManagerActor")
+  val playerActor = system.actorOf(Props[PlayerManager], "PlayerActor")
+  playerActor ! PlayerManager.AddNewPlayer(playerActor)
+  playerActor ! RoomManager.GetStartRoom
+  playerActor ! Player.Intro
+  
+  
 
-  val player = new Player
-  private var input = readLine
-  while (input != "exit") {
-    player.processCommand(input)
-    input = readLine
-  }
+//  val player = new Player
+//  private var input = readLine
+//  while (input != "exit") {
+//    player.processCommand(input)
+//    input = readLine
+//  }
+ system.scheduler.schedule(0.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
+
 }

@@ -1,9 +1,36 @@
 package mud
 
-class Player {
+import scala.io.StdIn.readLine
+import akka.actor.Actor
+import akka.actor.ActorRef
+
+class Player extends Actor {
+
   //Sets initial room location and inventory.
   private var inventory = List[Item]()
-  private var currentRoom = Room.rooms("Backyard porch")
+  //message- getstartroom room manager.getSR
+  //sender ! player getSR (Rooms(room thing)
+  private var currentRoom: ActorRef = null
+  import Player._
+  def receive = {
+    case intro =>
+      println("Welcome to the game. Here are some helpful commands to get you started.")
+      println("north, south, east, west, up, down - moves your player.")
+      println("look - reprints the description of the current room")
+      println("inv - list the contents of your inventory")
+      println("get item - to get an item from the room and add it to your inventory")
+      println("drop item - to drop an item from your inventory into the room.")
+      println("exit - leave the game")
+      println("help - print the available commands and what they do.")
+    case GetStartRoom(room) => currentRoom = room
+    case GetDescription(room) => sender ! 
+    case CheckInput =>
+      val input = readLine()
+      if (input != null) {
+        processCommand(input)
+      }
+  }
+
   //Processes the user's command and takes the appropriate action.
   def processCommand(command: String): Unit = {
     command match {
@@ -13,7 +40,7 @@ class Player {
       case "west" => move("west")
       case "up" => move("up")
       case "down" => move("down")
-      case "look" => println(currentRoom.description)
+      case "look" => currentRoom ! Room.GetDescription
       case "inv" => println(inventoryListing())
       case s if s.startsWith("get") => findItem(command.substring(4))
       case s if s.startsWith("drop") => addItemToRoom(dropItem(command.substring(5)))
@@ -87,4 +114,13 @@ class Player {
     }
     println(currentRoom.description)
   }
+
+}
+
+object Player {
+  case object Intro
+  case class GetStartRoom(room: ActorRef)
+  case object CheckInput
+  case class Print(string: String)
+  case class GetDescription(room: ActorRef)
 }

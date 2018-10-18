@@ -1,18 +1,33 @@
 package mud
 
 import scala.io.Source
+import akka.actor.Actor
+import akka.actor.ActorRef
 
-class Room(
+
+class Room (
   //Sets the name, description, exits, and items in each room.
+  keyword: String,
   name: String,
   desc: String,
-  exits: Array[Option[String]],
-  private var items: List[Item]) {
+  exitKeys: Array[String],
+  private var items: List[Item]
+  ) extends Actor{ 
+  private var exits: Array[Option[ActorRef]] = null
+  
+  import Room._
+  def receive = {
+    case GetExit(dir) => ???
+    //sender ! Player.TakeExit(getExit(dir))
+    case LinkExits(rooms) =>
+      exits = exitKeys.map(key => rooms.get(key))
+    case _ => 
+  }
 
   //Gets the room that is reached by going in a direction,
   //if there is an exit in that direction.
-  def getExit(dir: Int): Option[Room] = {
-    exits(dir).map(Room.rooms)
+  def getExit(dir: Int): Option[ActorRef] = {
+    exits(dir)
   }
 
   //Creates a string of the items that are in the current room.
@@ -63,33 +78,12 @@ class Room(
 }
 
 object Room {
-  val rooms = readRooms()
-
-  //Map of rooms is created using map.txt file.
-  def readRooms(): Map[String, Room] = {
-    val source = Source.fromFile("map.txt")
-    val lines = source.getLines()
-    val rooms = Array.fill(lines.next().trim().toInt)(readRoom(lines)).toMap
-    source.close
-    rooms
-  }
- 
-
-  //File of the map is used to determine number of room,
-  //name and description of room, possible exits, and items. 
-  //Map is created with room name and info.
-  def readRoom(lines: Iterator[String]): (String, Room) = {
-    val number = lines.next()
-    val name = lines.next()
-    val desc = lines.next()
-    val exits = lines.next().split(",").map(_.trim).map(i => if (i == "-1") None else Some(i))
-    val items = List.fill(lines.next().trim.toInt) {
-      val Array(name, desc) = lines.next().split(",", 2)
-      Item(name.trim, desc.trim)
-
-    }
-    val r = new Room(name, desc, exits, items)
-    (name, r)
-  }
-
+  //Messages sent by player
+  case class GetExit(dir: Int)
+  case class GetItem(itemName: String)
+  case class DropItem(item: String)
+  
+  //Messages sent by RoomManager
+  case class LinkExits(rooms: Map[String, ActorRef])
+  
 }
