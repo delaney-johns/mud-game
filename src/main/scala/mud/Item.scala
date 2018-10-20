@@ -6,5 +6,4 @@ case class Item(
   val coin = ("A coin", "Shiny!")
   val stick = ("A stick", "Brown and sticky.")
   val photo = ("A photo of Bob Ross", "How inspirational.")
-
 }

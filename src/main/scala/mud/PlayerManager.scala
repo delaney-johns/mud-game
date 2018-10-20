@@ -2,18 +2,23 @@ package mud
 
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.Props
 
 class PlayerManager extends Actor {
   private var listOfAllPlayers = List[ActorRef]()
-  def addPlayerToList(player:ActorRef) = {
-    player :: listOfAllPlayers
+  def addPlayerToList(player: ActorRef) = {
+    listOfAllPlayers = player :: listOfAllPlayers
   }
   import PlayerManager._
   def receive = {
-    case AddNewPlayer(player) => addPlayerToList(player)
-    case Refresh =>  listOfAllPlayers.foreach(p => p ! Player.CheckInput)
- 
-    case _ => 
+    case AddNewPlayer(player) => val p = context.actorOf(Props(player), "p1")
+p ! Player.GetStartRoom
+p ! Player.Intro
+    //player size one
+    case Refresh => listOfAllPlayers.foreach(p => p ! Player.CheckInput)
+    //player size zero again
+    //case StartRoom =>
+    case _ =>
   }
 }
 

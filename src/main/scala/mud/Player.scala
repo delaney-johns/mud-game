@@ -11,9 +11,11 @@ class Player extends Actor {
   //message- getstartroom room manager.getSR
   //sender ! player getSR (Rooms(room thing)
   private var currentRoom: ActorRef = null
+
+  
   import Player._
   def receive = {
-    case intro =>
+    case Intro =>
       println("Welcome to the game. Here are some helpful commands to get you started.")
       println("north, south, east, west, up, down - moves your player.")
       println("look - reprints the description of the current room")
@@ -23,7 +25,11 @@ class Player extends Actor {
       println("exit - leave the game")
       println("help - print the available commands and what they do.")
     case GetStartRoom(room) => currentRoom = room
-    case GetDescription(room) => sender ! 
+    case GetDescription(description) => println(description)
+    case ReceiveItem(itemOption: Option[Item]) => 
+      if (itemOption != None) addToInventory(itemOption.get)
+    case TakeExit(room: Option[ActorRef]) =>
+      if (room != None) currentRoom = room.get
     case CheckInput =>
       val input = readLine()
       if (input != null) {
@@ -42,7 +48,8 @@ class Player extends Actor {
       case "down" => move("down")
       case "look" => currentRoom ! Room.GetDescription
       case "inv" => println(inventoryListing())
-      case s if s.startsWith("get") => findItem(command.substring(4))
+      case s if s.startsWith("get") => currentRoom ! Room.GetItem(command.substring(4))
+//        findItem(command.substring(4))
       case s if s.startsWith("drop") => addItemToRoom(dropItem(command.substring(5)))
       case "exit" => println("Leave the game.")
       case "help" =>
@@ -58,6 +65,9 @@ class Player extends Actor {
     }
   }
 
+
+  
+  
   //Finds an item out of the inventory (if the player has it) and returns the item.
   def getFromInventory(itemName: String): Option[Item] = {
     val indexOfItem = inventory.indexWhere(_.name == itemName)
@@ -80,12 +90,13 @@ class Player extends Actor {
     }
   }
 
-  //Takes an item that the user typed and adds it to the player's
-  //inventory, if the item is in the current room.
-  def findItem(itemFromCommand: String): Unit = {
-    val gottenItem = currentRoom.getItem(itemFromCommand)
-    if (gottenItem != None) addToInventory(gottenItem.get)
-  }
+//  //Takes an item that the user typed and adds it to the player's
+//  //inventory, if the item is in the current room.
+//  def findItem(itemFromCommand: String): Unit = {
+//    //val gottenItem = currentRoom.getItem(itemFromCommand)
+//    val gottenItem = currentRoom ! Room.GetItem(itemFromCommand)
+//    if (gottenItem != None) addToInventory(gottenItem.get)
+//  }
 
   //Takes an item that the user typed and removes it
   //from the player's inventory.
@@ -100,7 +111,10 @@ class Player extends Actor {
 
   //Takes an item and adds it to the current room.
   def addItemToRoom(item: Option[Item]): Unit = {
-    if (item != None) currentRoom.dropItem(item.get)
+    if (item != None) {
+      //currentRoom.dropItem(item.get)
+      currentRoom ! Room.DropItem(item.get)
+    }
   }
 
   //Takes a direction that the player typed in and
@@ -108,11 +122,12 @@ class Player extends Actor {
   def move(dir: String): Unit = {
     val directionArray = Array("north", "south", "east", "west", "up", "down")
     val direction = directionArray.indexOf(dir)
-    if (currentRoom.getExit(direction) != None) {
-      val newRoom = currentRoom.getExit(direction).get
-      currentRoom = newRoom
-    }
-    println(currentRoom.description)
+//    //if (currentRoom.getExit(direction) != None) 
+//    if (currentRoom !GetExit(direction) != None){
+//      currentRoom = currentRoom.getExit(direction).get
+//      
+//    }
+   currentRoom ! Room.GetDescription
   }
 
 }
@@ -121,6 +136,7 @@ object Player {
   case object Intro
   case class GetStartRoom(room: ActorRef)
   case object CheckInput
-  case class Print(string: String)
-  case class GetDescription(room: ActorRef)
+  case class GetDescription(room: Room)
+  case class ReceiveItem(itemOption: Option[Item])
+  case class TakeExit(newRoom: Option[ActorRef])
 }
