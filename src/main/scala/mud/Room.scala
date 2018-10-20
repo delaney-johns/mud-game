@@ -21,7 +21,9 @@ class Room (
     //sender ! Player.TakeExit(getExit(dir))
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
-    case GetDescription(room) => sender ! room.description()
+    case GetDescription => 
+      sender ! Player.Print("rece message")
+      sender ! Player.Print(description())
     case DropItem(item) => sender ! dropItem(item)
     case GetItem(itemName) => sender ! getItem(itemName)
     case _ => 
@@ -85,7 +87,7 @@ object Room {
   case class GetExit(dir: Int)
   case class GetItem(itemName: String)
   case class DropItem(item: Item)
-  case class GetDescription(room: Room)
+  case object GetDescription
   
   //Messages sent by RoomManager
   case class LinkExits(rooms: Map[String, ActorRef])

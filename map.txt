@@ -1,5 +1,5 @@
 3
-0
+Porch
 Backyard porch
 It's a rainy day.
 Garden, -1, -1,Inside, -1, -1
@@ -11,7 +11,7 @@ Your family waits for you at the dining table.
 -1, -1,Backyard porch, -1, -1, -1
 1
 A coin, Shiny!
-2
+Garden
 Garden
 Lots of flowers in geometric shapes.
 -1,Backyard porch, -1, -1, -1, -1

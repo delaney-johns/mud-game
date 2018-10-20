@@ -9,7 +9,9 @@ import akka.actor.Props
 class RoomManager extends Actor{
   import RoomManager._
   def receive = {
-    case GetStartRoom => sender ! Player.GetStartRoom(rooms("Backyard porch"))
+    case GetStartRoom => 
+    sender ! Player.GetStartRoom(rooms("Porch"))
+    case GetDescription => sender ! Player.Print("im in room manager")
     case _ => 
   }
   

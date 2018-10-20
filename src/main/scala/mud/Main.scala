@@ -11,10 +11,9 @@ object Main extends App {
   val system = ActorSystem("MUDSystem")
   val playerManager = system.actorOf(Props[PlayerManager], "PlayerManagerActor")
   val roomManager = system.actorOf(Props[RoomManager], "RoomManagerActor")
-  val playerActor = system.actorOf(Props[PlayerManager], "PlayerActor")
-  playerActor ! PlayerManager.AddNewPlayer(playerActor)
-  playerActor ! RoomManager.GetStartRoom
-  playerActor ! Player.Intro
+  val playerActor = system.actorOf(Props[Player], "PlayerActor")
+//  playerActor ! PlayerManager.AddNewPlayer("player1")
+
   
   
 
@@ -24,6 +23,8 @@ object Main extends App {
 //    player.processCommand(input)
 //    input = readLine
 //  }
- system.scheduler.schedule(0.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
+  system.scheduler.scheduleOnce(0 seconds, playerManager, PlayerManager.AddNewPlayer("player1"))
+
+ system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
 
 }

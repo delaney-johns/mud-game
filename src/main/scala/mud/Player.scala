@@ -30,6 +30,8 @@ class Player extends Actor {
       if (itemOption != None) addToInventory(itemOption.get)
     case TakeExit(room: Option[ActorRef]) =>
       if (room != None) currentRoom = room.get
+    case RequestStartRoom => Main.roomManager ! RoomManager.GetStartRoom
+    case Print(message) => println(message)
     case CheckInput =>
       val input = readLine()
       if (input != null) {
@@ -46,7 +48,8 @@ class Player extends Actor {
       case "west" => move("west")
       case "up" => move("up")
       case "down" => move("down")
-      case "look" => currentRoom ! Room.GetDescription
+      case "look" => println(currentRoom)
+        look
       case "inv" => println(inventoryListing())
       case s if s.startsWith("get") => currentRoom ! Room.GetItem(command.substring(4))
 //        findItem(command.substring(4))
@@ -65,7 +68,10 @@ class Player extends Actor {
     }
   }
 
-
+def look = {
+  println("something")
+  currentRoom ! Room.GetDescription
+}
   
   
   //Finds an item out of the inventory (if the player has it) and returns the item.
@@ -139,4 +145,6 @@ object Player {
   case class GetDescription(room: Room)
   case class ReceiveItem(itemOption: Option[Item])
   case class TakeExit(newRoom: Option[ActorRef])
+  case object RequestStartRoom
+  case class Print(message: String)
 }
