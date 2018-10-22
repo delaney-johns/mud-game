@@ -12,8 +12,8 @@ class PlayerManager extends Actor {
 
   import PlayerManager._
   def receive = {
-    case AddNewPlayer(player, br, ps) =>
-      val p = context.actorOf(Props(new Player(player, br, ps)), player)
+    case AddNewPlayer(player, sock, br, ps) =>
+      val p = context.actorOf(Props(new Player(player, sock, br, ps)), player)
       println(p)
       p ! Player.RequestStartRoom
       p ! Player.Intro
@@ -25,6 +25,6 @@ class PlayerManager extends Actor {
 }
 
 object PlayerManager {
-  case class AddNewPlayer(player: String, br: BufferedReader, ps: PrintStream)
+  case class AddNewPlayer(player: String, sock: ServerSocket, br: BufferedReader, ps: PrintStream)
   case object Refresh
 }

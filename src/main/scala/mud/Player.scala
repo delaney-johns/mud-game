@@ -6,7 +6,7 @@ import java.io.PrintStream
 import java.io.BufferedReader
 import java.net.ServerSocket
 
-class Player(name: String, br: BufferedReader, ps: PrintStream) extends Actor {
+class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStream) extends Actor {
 
   //Sets initial room location and inventory.
   private var inventory = List[Item]()
@@ -111,7 +111,6 @@ class Player(name: String, br: BufferedReader, ps: PrintStream) extends Actor {
   //Takes an item and adds it to the current room.
   def addItemToRoom(item: Option[Item]): Unit = {
     if (item != None) {
-      //currentRoom.dropItem(item.get)
       currentRoom ! Room.DropItem(item.get)
     } else ps.println("You don't even have that item!")
   }
