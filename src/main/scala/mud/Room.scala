@@ -17,15 +17,15 @@ class Room (
   
   import Room._
   def receive = {
-    case GetExit(dir) => ???
-    //sender ! Player.TakeExit(getExit(dir))
+    case GetExit(dir) => sender ! Player.TakeExit(getExit(dir))
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
+      println(name + " " + exits.mkString (", "))
     case GetDescription => 
       sender ! Player.Print("rece message")
       sender ! Player.Print(description())
-    case DropItem(item) => sender ! dropItem(item)
-    case GetItem(itemName) => sender ! getItem(itemName)
+    case DropItem(item) => dropItem(item)
+    case GetItem(itemName) => sender ! Player.ReceiveItem(getItem(itemName))
     case _ => 
   }
 

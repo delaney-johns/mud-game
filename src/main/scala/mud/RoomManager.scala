@@ -6,17 +6,16 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 
-class RoomManager extends Actor{
+class RoomManager extends Actor {
   import RoomManager._
   def receive = {
-    case GetStartRoom => 
-    sender ! Player.GetStartRoom(rooms("Porch"))
-    case GetDescription => sender ! Player.Print("im in room manager")
-    case _ => 
+    case GetStartRoom =>
+      sender ! Player.GetStartRoom(rooms("Porch"))
+    case _ =>
   }
-  
+
   private val rooms = readRooms()
-  for((_,room) <- rooms) room ! Room.LinkExits(rooms)
+  for ((_, room) <- rooms) room ! Room.LinkExits(rooms)
 
   //Map of rooms is created using map.txt file.
   def readRooms(): Map[String, ActorRef] = {
@@ -26,9 +25,9 @@ class RoomManager extends Actor{
     source.close()
     rooms.toMap
   }
-  
-    //File of the map is used to determine number of room,
-  //name and description of room, possible exits, and items. 
+
+  //File of the map is used to determine number of room,
+  //name and description of room, possible exits, and items.
   //Map is created with room name and info.
   def readRoom(lines: Iterator[String]): (String, ActorRef) = {
     val keyword = lines.next()
@@ -41,7 +40,7 @@ class RoomManager extends Actor{
 
     }
     keyword -> context.actorOf(Props(new Room(keyword, name, desc, exits, items)), keyword)
-    
+
   }
 
 }

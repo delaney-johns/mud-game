@@ -1,10 +1,12 @@
 package mud
 
-import scala.io.StdIn.readLine
 import akka.actor.Actor
 import akka.actor.ActorRef
+import java.io.PrintStream
+import java.io.BufferedReader
+import java.net.ServerSocket
 
-class Player extends Actor {
+class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
 
   //Sets initial room location and inventory.
   private var inventory = List[Item]()
@@ -12,31 +14,39 @@ class Player extends Actor {
   //sender ! player getSR (Rooms(room thing)
   private var currentRoom: ActorRef = null
 
-  
   import Player._
   def receive = {
     case Intro =>
-      println("Welcome to the game. Here are some helpful commands to get you started.")
-      println("north, south, east, west, up, down - moves your player.")
-      println("look - reprints the description of the current room")
-      println("inv - list the contents of your inventory")
-      println("get item - to get an item from the room and add it to your inventory")
-      println("drop item - to drop an item from your inventory into the room.")
-      println("exit - leave the game")
-      println("help - print the available commands and what they do.")
+      ps.println("Welcome to the game. Here are some helpful commands to get you started.")
+      ps.println("north, south, east, west, up, down - moves your player.")
+      ps.println("look - reprints the description of the current room")
+      ps.println("inv - list the contents of your inventory")
+      ps.println("get item - to get an item from the room and add it to your inventory")
+      ps.println("drop item - to drop an item from your inventory into the room.")
+      ps.println("exit - leave the game")
+      ps.println("help - print the available commands and what they do.")
     case GetStartRoom(room) => currentRoom = room
-    case GetDescription(description) => println(description)
-    case ReceiveItem(itemOption: Option[Item]) => 
+    currentRoom ! Room.GetDescription
+    case GetDescription(description) => ps.println(description)
+    case ReceiveItem(itemOption: Option[Item]) =>
       if (itemOption != None) addToInventory(itemOption.get)
+      else ps.println("That's not an item!")
     case TakeExit(room: Option[ActorRef]) =>
-      if (room != None) currentRoom = room.get
+      if (room != None) {
+        currentRoom = room.get
+        currentRoom ! Room.GetDescription
+      } else
+        ps.println("You can't go that way!")
     case RequestStartRoom => Main.roomManager ! RoomManager.GetStartRoom
-    case Print(message) => println(message)
+    case Print(message) => ps.println(message)
     case CheckInput =>
-      val input = readLine()
-      if (input != null) {
-        processCommand(input)
+      if (br.ready()) {
+        val input = br.readLine()
+        if (input != null) {
+          processCommand(input)
+        }
       }
+    case m => println("Unhandled message in player" + m)
   }
 
   //Processes the user's command and takes the appropriate action.
@@ -48,32 +58,32 @@ class Player extends Actor {
       case "west" => move("west")
       case "up" => move("up")
       case "down" => move("down")
-      case "look" => println(currentRoom)
+      case "look" =>
+        ps.println(currentRoom)
         look
-      case "inv" => println(inventoryListing())
+      case "inv" => ps.println(inventoryListing())
       case s if s.startsWith("get") => currentRoom ! Room.GetItem(command.substring(4))
-//        findItem(command.substring(4))
+      //        findItem(command.substring(4))
       case s if s.startsWith("drop") => addItemToRoom(dropItem(command.substring(5)))
-      case "exit" => println("Leave the game.")
+      case "exit" => ps.println("Leave the game.")
       case "help" =>
-        println("north, south, east, west, up, down - moves your player.")
-        println("look - reprints the description of the current room")
-        println("inv - list the contents of your inventory")
-        println("get item - to get an item from the room and add it to your inventory")
-        println("drop item - to drop an item from your inventory into the room.")
-        println("exit - leave the game")
-        println("help - print the available commands and what they do.")
-      case _ => println("Not a valid command.")
+        ps.println("north, south, east, west, up, down - moves your player.")
+        ps.println("look - reprints the description of the current room")
+        ps.println("inv - list the contents of your inventory")
+        ps.println("get item - to get an item from the room and add it to your inventory")
+        ps.println("drop item - to drop an item from your inventory into the room.")
+        ps.println("exit - leave the game")
+        ps.println("help - print the available commands and what they do.")
+      case _ => ps.println("Not a valid command.")
 
     }
   }
 
-def look = {
-  println("something")
-  currentRoom ! Room.GetDescription
-}
-  
-  
+  def look = {
+    println("something")
+    currentRoom ! Room.GetDescription
+  }
+
   //Finds an item out of the inventory (if the player has it) and returns the item.
   def getFromInventory(itemName: String): Option[Item] = {
     val indexOfItem = inventory.indexWhere(_.name == itemName)
@@ -96,13 +106,13 @@ def look = {
     }
   }
 
-//  //Takes an item that the user typed and adds it to the player's
-//  //inventory, if the item is in the current room.
-//  def findItem(itemFromCommand: String): Unit = {
-//    //val gottenItem = currentRoom.getItem(itemFromCommand)
-//    val gottenItem = currentRoom ! Room.GetItem(itemFromCommand)
-//    if (gottenItem != None) addToInventory(gottenItem.get)
-//  }
+  //  //Takes an item that the user typed and adds it to the player's
+  //  //inventory, if the item is in the current room.
+  //  def findItem(itemFromCommand: String): Unit = {
+  //    //val gottenItem = currentRoom.getItem(itemFromCommand)
+  //    val gottenItem = currentRoom ! Room.GetItem(itemFromCommand)
+  //    if (gottenItem != None) addToInventory(gottenItem.get)
+  //  }
 
   //Takes an item that the user typed and removes it
   //from the player's inventory.
@@ -120,7 +130,7 @@ def look = {
     if (item != None) {
       //currentRoom.dropItem(item.get)
       currentRoom ! Room.DropItem(item.get)
-    }
+    } else ps.println("You don't even have that item!")
   }
 
   //Takes a direction that the player typed in and
@@ -128,12 +138,12 @@ def look = {
   def move(dir: String): Unit = {
     val directionArray = Array("north", "south", "east", "west", "up", "down")
     val direction = directionArray.indexOf(dir)
-//    //if (currentRoom.getExit(direction) != None) 
-//    if (currentRoom !GetExit(direction) != None){
-//      currentRoom = currentRoom.getExit(direction).get
-//      
-//    }
-   currentRoom ! Room.GetDescription
+    //    //if (currentRoom.getExit(direction) != None)
+    //    if (currentRoom !GetExit(direction) != None){
+    //      currentRoom = currentRoom.getExit(direction).get
+    //
+    //    }
+    currentRoom ! Room.GetExit(direction)
   }
 
 }

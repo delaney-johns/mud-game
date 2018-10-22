@@ -5,16 +5,16 @@ It's a rainy day.
 Garden, -1, -1,Inside, -1, -1
 1
 A photo of Bob Ross, How inspirational.
-1
+Inside
 Inside
 Your family waits for you at the dining table.
--1, -1,Backyard porch, -1, -1, -1
+-1, -1,Porch, -1, -1, -1
 1
 A coin, Shiny!
 Garden
 Garden
 Lots of flowers in geometric shapes.
--1,Backyard porch, -1, -1, -1, -1
+-1,Porch, -1, -1, -1, -1
 1
 A stick, Brown and sticky.
 
