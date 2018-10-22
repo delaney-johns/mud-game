@@ -20,9 +20,7 @@ class Room (
     case GetExit(dir) => sender ! Player.TakeExit(getExit(dir))
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
-      println(name + " " + exits.mkString (", "))
     case GetDescription => 
-      sender ! Player.Print("rece message")
       sender ! Player.Print(description())
     case DropItem(item) => dropItem(item)
     case GetItem(itemName) => sender ! Player.ReceiveItem(getItem(itemName))

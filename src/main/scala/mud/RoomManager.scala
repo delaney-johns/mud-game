@@ -42,7 +42,6 @@ class RoomManager extends Actor {
     keyword -> context.actorOf(Props(new Room(keyword, name, desc, exits, items)), keyword)
 
   }
-
 }
 
 object RoomManager {

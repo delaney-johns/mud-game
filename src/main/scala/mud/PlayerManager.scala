@@ -9,22 +9,22 @@ import akka.actor.Props
 import java.net.ServerSocket
 
 class PlayerManager extends Actor {
-  
+
   import PlayerManager._
   def receive = {
-    case AddNewPlayer(player,  br, ps) => val p = context.actorOf(Props(new Player(player, br, ps)), player)
-    println(p)
-p ! Player.RequestStartRoom
-p ! Player.Intro
+    case AddNewPlayer(player, br, ps) =>
+      val p = context.actorOf(Props(new Player(player, br, ps)), player)
+      println(p)
+      p ! Player.RequestStartRoom
+      p ! Player.Intro
     //player size one
     case Refresh => context.children.foreach(p => p ! Player.CheckInput)
     //player size zero again
-    //case StartRoom =>
     case _ =>
   }
 }
 
 object PlayerManager {
-  case class AddNewPlayer(player: String,  br:BufferedReader, ps:PrintStream)
+  case class AddNewPlayer(player: String, br: BufferedReader, ps: PrintStream)
   case object Refresh
 }

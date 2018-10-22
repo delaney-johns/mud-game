@@ -17,29 +17,27 @@ object Main extends App {
   val playerManager = system.actorOf(Props[PlayerManager], "PlayerManagerActor")
   val roomManager = system.actorOf(Props[RoomManager], "RoomManagerActor")
   //val playerActor = system.actorOf(Props[Player], "PlayerActor")
-//  playerActor ! PlayerManager.AddNewPlayer("player1")
-//val ss = new ServerSocket(4040)
-//  while (true) {
-//    val sock = ss.accept()
-//    Future {
-//      val ps = new PrintStream(sock.getOutputStream)
-//      val br = new BufferedReader(new InputStreamReader(sock.getInputStream))
-//      ps.println("What is your name?")
-//      val name = br.readLine()
-//      playerManager ! PlayerManager.AddNewPlayer(name, sock, br, ps)
-//    }
-//}
-  
-  
+  //  playerActor ! PlayerManager.AddNewPlayer("player1")
+  //val ss = new ServerSocket(4040)
+  //  while (true) {
+  //    val sock = ss.accept()
+  //    Future {
+  //      val ps = new PrintStream(sock.getOutputStream)
+  //      val br = new BufferedReader(new InputStreamReader(sock.getInputStream))
+  //      ps.println("What is your name?")
+  //      val name = br.readLine()
+  //      playerManager ! PlayerManager.AddNewPlayer(name, sock, br, ps)
+  //    }
+  //}
 
-//  val player = new Player
-//  private var input = readLine
-//  while (input != "exit") {
-//    player.processCommand(input)
-//    input = readLine
-//  }
-  system.scheduler.scheduleOnce(0 seconds, playerManager, PlayerManager.AddNewPlayer("player1",Console.in, Console.out))
+  //  val player = new Player
+  //  private var input = readLine
+  //  while (input != "exit") {
+  //    player.processCommand(input)
+  //    input = readLine
+  //  }
+  system.scheduler.scheduleOnce(0 seconds, playerManager, PlayerManager.AddNewPlayer("player1", Console.in, Console.out))
 
- system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
+  system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
 
 }

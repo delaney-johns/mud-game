@@ -6,12 +6,10 @@ import java.io.PrintStream
 import java.io.BufferedReader
 import java.net.ServerSocket
 
-class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
+class Player(name: String, br: BufferedReader, ps: PrintStream) extends Actor {
 
   //Sets initial room location and inventory.
   private var inventory = List[Item]()
-  //message- getstartroom room manager.getSR
-  //sender ! player getSR (Rooms(room thing)
   private var currentRoom: ActorRef = null
 
   import Player._
@@ -25,8 +23,9 @@ class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
       ps.println("drop item - to drop an item from your inventory into the room.")
       ps.println("exit - leave the game")
       ps.println("help - print the available commands and what they do.")
-    case GetStartRoom(room) => currentRoom = room
-    currentRoom ! Room.GetDescription
+    case GetStartRoom(room) =>
+      currentRoom = room
+      currentRoom ! Room.GetDescription
     case GetDescription(description) => ps.println(description)
     case ReceiveItem(itemOption: Option[Item]) =>
       if (itemOption != None) addToInventory(itemOption.get)
@@ -58,12 +57,9 @@ class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
       case "west" => move("west")
       case "up" => move("up")
       case "down" => move("down")
-      case "look" =>
-        ps.println(currentRoom)
-        look
+      case "look" => currentRoom ! Room.GetDescription
       case "inv" => ps.println(inventoryListing())
       case s if s.startsWith("get") => currentRoom ! Room.GetItem(command.substring(4))
-      //        findItem(command.substring(4))
       case s if s.startsWith("drop") => addItemToRoom(dropItem(command.substring(5)))
       case "exit" => ps.println("Leave the game.")
       case "help" =>
@@ -77,11 +73,6 @@ class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
       case _ => ps.println("Not a valid command.")
 
     }
-  }
-
-  def look = {
-    println("something")
-    currentRoom ! Room.GetDescription
   }
 
   //Finds an item out of the inventory (if the player has it) and returns the item.
@@ -105,14 +96,6 @@ class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
       "Inventory: \n" + inventoryDesc
     }
   }
-
-  //  //Takes an item that the user typed and adds it to the player's
-  //  //inventory, if the item is in the current room.
-  //  def findItem(itemFromCommand: String): Unit = {
-  //    //val gottenItem = currentRoom.getItem(itemFromCommand)
-  //    val gottenItem = currentRoom ! Room.GetItem(itemFromCommand)
-  //    if (gottenItem != None) addToInventory(gottenItem.get)
-  //  }
 
   //Takes an item that the user typed and removes it
   //from the player's inventory.
@@ -138,11 +121,6 @@ class Player(name:String, br: BufferedReader, ps: PrintStream) extends Actor {
   def move(dir: String): Unit = {
     val directionArray = Array("north", "south", "east", "west", "up", "down")
     val direction = directionArray.indexOf(dir)
-    //    //if (currentRoom.getExit(direction) != None)
-    //    if (currentRoom !GetExit(direction) != None){
-    //      currentRoom = currentRoom.getExit(direction).get
-    //
-    //    }
     currentRoom ! Room.GetExit(direction)
   }
 
