@@ -4,27 +4,35 @@ import scala.io.Source
 import akka.actor.Actor
 import akka.actor.ActorRef
 
-
-class Room (
+class Room(
   //Sets the name, description, exits, and items in each room.
   keyword: String,
   name: String,
   desc: String,
   exitKeys: Array[String],
-  private var items: List[Item]
-  ) extends Actor{ 
+  private var items: List[Item]) extends Actor {
   private var exits: Array[Option[ActorRef]] = null
-  
+  var playerList = List[ActorRef]()
+
   import Room._
   def receive = {
-    case GetExit(dir) => sender ! Player.TakeExit(getExit(dir))
+    case GetExit(dir) =>
+      sender ! Player.TakeExit(getExit(dir))
+      playerList.filter(_ != sender)
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
-    case GetDescription => 
+    case GetDescription =>
       sender ! Player.Print(description())
     case DropItem(item) => dropItem(item)
     case GetItem(itemName) => sender ! Player.ReceiveItem(getItem(itemName))
-    case _ => 
+    case PlayerEntersRoom(player) => 
+      playerList.foreach(_ ! Player.Print(player.path.name + " has arrived!"))
+      playerList ::= player
+    case PlayerExitsRoom(player) => playerList = playerList.filter(_ != player)
+     playerList.foreach(_ ! Player.Print(player.path.name + " has left!"))
+    case TellEveryoneInRoom(message) => 
+      playerList.filter(_ != sender).foreach(_ ! Player.Print(sender.path.name + " said " + message))
+    case _ =>
   }
 
   //Gets the room that is reached by going in a direction,
@@ -60,7 +68,7 @@ class Room (
 
   //Creates a string with the name, description, items, and exits for the current room.
   def description(): String = {
-    name + "\n" + desc + "\n" + "Items: " + printList + "\n" + "Exits: " + printExits
+    name + "\n" + desc + "\n" + "Items: " + printList + "\n" + "Exits: " + printExits + "\n" + "Players here: " + playerList.map(_.path.name).mkString(", ") + "\n"
   }
 
   //Pulls an item from a room (if it is in the room) and returns it.
@@ -86,9 +94,12 @@ object Room {
   case class GetItem(itemName: String)
   case class DropItem(item: Item)
   case object GetDescription
-  
+  case class PlayerEntersRoom(player: ActorRef)
+  case class PlayerExitsRoom(player: ActorRef)
+  case class TellEveryoneInRoom(message: String)
+
+
   //Messages sent by RoomManager
   case class LinkExits(rooms: Map[String, ActorRef])
-  
-  
+
 }

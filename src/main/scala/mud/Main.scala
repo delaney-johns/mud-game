@@ -18,6 +18,7 @@ object Main extends App {
   val roomManager = system.actorOf(Props[RoomManager], "RoomManagerActor")
   //val playerActor = system.actorOf(Props[Player], "PlayerActor")
   //  playerActor ! PlayerManager.AddNewPlayer("player1")
+    system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
  val ss = new ServerSocket(4040)
     while (true) {
       val sock = ss.accept()
@@ -32,6 +33,6 @@ object Main extends App {
 
 
 
-  system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
+
 
 }

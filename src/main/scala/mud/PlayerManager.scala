@@ -20,6 +20,11 @@ class PlayerManager extends Actor {
     //player size one
     case Refresh => context.children.foreach(p => p ! Player.CheckInput)
     //player size zero again
+    case TellOneUser(playerName, message) => 
+      println("tell one user here")
+          println(playerName)
+    println(message)
+//      context.children.filter(_ == playerName).foreach(_ ! Player.Print( sender.path.name + " said " + message))
     case _ =>
   }
 }
@@ -27,4 +32,5 @@ class PlayerManager extends Actor {
 object PlayerManager {
   case class AddNewPlayer(player: String, sock: ServerSocket, br: BufferedReader, ps: PrintStream)
   case object Refresh
+    case class TellOneUser(playerName: String, message: String)
 }

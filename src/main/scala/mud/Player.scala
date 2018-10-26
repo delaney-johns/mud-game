@@ -23,8 +23,12 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
       ps.println("drop item - to drop an item from your inventory into the room.")
       ps.println("exit - leave the game")
       ps.println("help - print the available commands and what they do.")
+      ps.println("say message - tell everyone in your room something")
+      ps.println("tell user message - tell anyone in the game something")
+
     case GetStartRoom(room) =>
       currentRoom = room
+      currentRoom ! Room.PlayerEntersRoom(self)
       currentRoom ! Room.GetDescription
     case GetDescription(description) => ps.println(description)
     case ReceiveItem(itemOption: Option[Item]) =>
@@ -32,7 +36,10 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
       else ps.println("That's not an item!")
     case TakeExit(room: Option[ActorRef]) =>
       if (room != None) {
+        //?
+        currentRoom ! Room.PlayerExitsRoom(self)
         currentRoom = room.get
+        currentRoom ! Room.PlayerEntersRoom(self)
         currentRoom ! Room.GetDescription
       } else
         ps.println("You can't go that way!")
@@ -70,6 +77,13 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
         ps.println("drop item - to drop an item from your inventory into the room.")
         ps.println("exit - leave the game")
         ps.println("help - print the available commands and what they do.")
+      case s if s.startsWith("say") => currentRoom ! Room.TellEveryoneInRoom(command.substring(4)) 
+      case s if s.startsWith("tell") => 
+        println("you typed tell.")
+        currentRoom ! PlayerManager.TellOneUser(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")), command.substring(command.lastIndexOf(" ") + 1))
+        println(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")))
+        println(command.substring(command.lastIndexOf(" ") + 1))
+        println("tell one user was called")
       case _ => ps.println("Not a valid command.")
 
     }
