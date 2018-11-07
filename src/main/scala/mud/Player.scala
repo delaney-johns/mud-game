@@ -9,7 +9,7 @@ import java.net.ServerSocket
 class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStream) extends Actor {
 
   //Sets initial room location and inventory.
-  private var inventory = List[Item]()
+  private var inventory = new DLListBuffer[Item]()
   private var currentRoom: ActorRef = null
 
   import Player._
@@ -36,7 +36,6 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
       else ps.println("That's not an item!")
     case TakeExit(room: Option[ActorRef]) =>
       if (room != None) {
-        //?
         currentRoom ! Room.PlayerExitsRoom(self)
         currentRoom = room.get
         currentRoom ! Room.PlayerEntersRoom(self)
@@ -80,10 +79,9 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
       case s if s.startsWith("say") => currentRoom ! Room.TellEveryoneInRoom(command.substring(4)) 
       case s if s.startsWith("tell") => 
         println("you typed tell.")
-        currentRoom ! PlayerManager.TellOneUser(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")), command.substring(command.lastIndexOf(" ") + 1))
+        Main.playerManager ! PlayerManager.TellOneUser(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")), command.substring(command.lastIndexOf(" ") + 1))
         println(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")))
         println(command.substring(command.lastIndexOf(" ") + 1))
-        println("tell one user was called")
       case _ => ps.println("Not a valid command.")
 
     }
@@ -97,7 +95,7 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
 
   //Adds an item to a player's inventory.
   def addToInventory(item: Item): Unit = {
-    inventory ::= item
+    inventory += item
   }
 
   //Shows items in an inventory, if any.
@@ -117,7 +115,8 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
     val indexOfItem = inventory.indexWhere(_.name == itemFromCommand)
     if (indexOfItem > -1) {
       val ret = Some(inventory(indexOfItem))
-      inventory = inventory.patch(indexOfItem, Nil, 1)
+      inventory.remove(indexOfItem)
+      //inventory = inventory.patch(indexOfItem, Nil, 1)
       ret
     } else None
   }
