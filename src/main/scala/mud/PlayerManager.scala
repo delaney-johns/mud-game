@@ -14,7 +14,6 @@ class PlayerManager extends Actor {
   def receive = {
     case AddNewPlayer(player, sock, br, ps) =>
       val p = context.actorOf(Props(new Player(player, sock, br, ps)), player)
-      println(p)
       p ! Player.RequestStartRoom
       p ! Player.Intro
     //player size one

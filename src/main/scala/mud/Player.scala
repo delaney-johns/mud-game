@@ -76,12 +76,10 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
         ps.println("drop item - to drop an item from your inventory into the room.")
         ps.println("exit - leave the game")
         ps.println("help - print the available commands and what they do.")
-      case s if s.startsWith("say") => currentRoom ! Room.TellEveryoneInRoom(command.substring(4)) 
-      case s if s.startsWith("tell") => 
-        println("you typed tell.")
-        Main.playerManager ! PlayerManager.TellOneUser(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")), command.substring(command.lastIndexOf(" ") + 1))
-        println(command.substring(command.indexOf(" ") + 1, command.lastIndexOf(" ")))
-        println(command.substring(command.lastIndexOf(" ") + 1))
+      case s if s.startsWith("say") => currentRoom ! Room.TellEveryoneInRoom(command.substring(4))
+      case s if s.startsWith("tell") =>
+        val playerNameAndMessageInput = command.split(" ", 3)
+        Main.playerManager ! PlayerManager.TellOneUser(playerNameAndMessageInput(1), playerNameAndMessageInput(2))
       case _ => ps.println("Not a valid command.")
 
     }
