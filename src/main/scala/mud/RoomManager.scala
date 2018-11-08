@@ -10,7 +10,7 @@ class RoomManager extends Actor {
   import RoomManager._
   def receive = {
     case GetStartRoom =>
-      sender ! Player.GetStartRoom(rooms("Porch"))
+      sender ! Character.GetStartRoom(rooms("Porch"))
     case _ =>
   }
 

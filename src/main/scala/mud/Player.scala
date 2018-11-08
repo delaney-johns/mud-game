@@ -12,7 +12,7 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
   private var inventory = new DLListBuffer[Item]()
   private var currentRoom: ActorRef = null
 
-  import Player._
+  import Character._
   def receive = {
     case Intro =>
       ps.println("Welcome to the game. Here are some helpful commands to get you started.")
@@ -78,6 +78,7 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
         ps.println("help - print the available commands and what they do.")
       case s if s.startsWith("say") => currentRoom ! Room.TellEveryoneInRoom(command.substring(4))
       case s if s.startsWith("tell") =>
+        //makes array of "tell", player's name, and message to send
         val playerNameAndMessageInput = command.split(" ", 3)
         Main.playerManager ! PlayerManager.TellOneUser(playerNameAndMessageInput(1), playerNameAndMessageInput(2))
       case _ => ps.println("Not a valid command.")
@@ -136,7 +137,7 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
 
 }
 
-object Player {
+object Character {
   case object Intro
   case class GetStartRoom(room: ActorRef)
   case object CheckInput
@@ -144,5 +145,7 @@ object Player {
   case class ReceiveItem(itemOption: Option[Item])
   case class TakeExit(newRoom: Option[ActorRef])
   case object RequestStartRoom
+  case object MoveNPC
+  case object ScheduleMove
   case class Print(message: String)
 }

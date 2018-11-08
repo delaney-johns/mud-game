@@ -16,23 +16,25 @@ object Main extends App {
   val system = ActorSystem("MUDSystem")
   val playerManager = system.actorOf(Props[PlayerManager], "PlayerManagerActor")
   val roomManager = system.actorOf(Props[RoomManager], "RoomManagerActor")
+  val activityManager = system.actorOf(Props[ActivityManager], "ActivityManagerActor")
+  val npcManager = system.actorOf(Props[NPCManager], "NPCManagerActor")
+  npcManager ! NPCManager.MakeNewNPC
+  
   //val playerActor = system.actorOf(Props[Player], "PlayerActor")
   //  playerActor ! PlayerManager.AddNewPlayer("player1")
-    system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
- val ss = new ServerSocket(4040)
-    while (true) {
-      val sock = ss.accept()
-      Future {
-        val ps = new PrintStream(sock.getOutputStream)
-        val br = new BufferedReader(new InputStreamReader(sock.getInputStream))
-        ps.println("What is your name?")
-        val name = br.readLine()
-        playerManager ! PlayerManager.AddNewPlayer(name, ss, br, ps)
-      }
+  system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
+  system.scheduler.schedule(0.1.seconds, 0.1.seconds, activityManager, ActivityManager.Refresh)
+
+  val ss = new ServerSocket(4040)
+  while (true) {
+    val sock = ss.accept()
+    Future {
+      val ps = new PrintStream(sock.getOutputStream)
+      val br = new BufferedReader(new InputStreamReader(sock.getInputStream))
+      ps.println("What is your name?")
+      val name = br.readLine()
+      playerManager ! PlayerManager.AddNewPlayer(name, ss, br, ps)
+    }
   }
-
-
-
-
 
 }

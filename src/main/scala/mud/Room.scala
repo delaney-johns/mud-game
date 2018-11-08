@@ -17,21 +17,21 @@ class Room(
   import Room._
   def receive = {
     case GetExit(dir) =>
-      sender ! Player.TakeExit(getExit(dir))
+      sender ! Character.TakeExit(getExit(dir))
       playerList.filter(_ != sender)
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
     case GetDescription =>
-      sender ! Player.Print(description())
+      sender ! Character.Print(description())
     case DropItem(item) => dropItem(item)
-    case GetItem(itemName) => sender ! Player.ReceiveItem(getItem(itemName))
+    case GetItem(itemName) => sender ! Character.ReceiveItem(getItem(itemName))
     case PlayerEntersRoom(player) => 
-      playerList.foreach(_ ! Player.Print(player.path.name + " has arrived!"))
+      playerList.foreach(_ ! Character.Print(player.path.name + " has arrived!"))
       playerList ::= player
     case PlayerExitsRoom(player) => playerList = playerList.filter(_ != player)
-     playerList.foreach(_ ! Player.Print(player.path.name + " has left!"))
+     playerList.foreach(_ ! Character.Print(player.path.name + " has left!"))
     case TellEveryoneInRoom(message) => 
-      playerList.filter(_ != sender).foreach(_ ! Player.Print(sender.path.name + " said " + message))
+      playerList.filter(_ != sender).foreach(_ ! Character.Print(sender.path.name + " said " + message))
     case _ =>
   }
 
