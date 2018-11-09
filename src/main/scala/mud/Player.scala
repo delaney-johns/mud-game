@@ -146,6 +146,5 @@ object Character {
   case class TakeExit(newRoom: Option[ActorRef])
   case object RequestStartRoom
   case object MoveNPC
-  case object ScheduleMove
   case class Print(message: String)
 }

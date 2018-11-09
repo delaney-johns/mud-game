@@ -23,7 +23,7 @@ object Main extends App {
   //val playerActor = system.actorOf(Props[Player], "PlayerActor")
   //  playerActor ! PlayerManager.AddNewPlayer("player1")
   system.scheduler.schedule(0.1.seconds, 0.1.seconds, playerManager, PlayerManager.Refresh)
-  system.scheduler.schedule(0.1.seconds, 0.1.seconds, activityManager, ActivityManager.Refresh)
+  system.scheduler.schedule(0.1.seconds, 0.1.seconds, activityManager, ActivityManager.CheckInput)
 
   val ss = new ServerSocket(4040)
   while (true) {

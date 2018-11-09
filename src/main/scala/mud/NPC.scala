@@ -9,8 +9,14 @@ class NPC(name: String) extends Actor {
   private var currentRoom: ActorRef = null
   val r = new Random()
   
-  
+  Main.activityManager ! ActivityManager.Enqueue(300, MoveNPC)
   def receive = {
+     case TakeExit(room: Option[ActorRef]) =>
+      if (room != None) {
+        currentRoom ! Room.PlayerExitsRoom(self)
+        currentRoom = room.get
+        currentRoom ! Room.PlayerEntersRoom(self)
+      } 
     case RequestStartRoom => Main.roomManager ! RoomManager.GetStartRoom
     case GetStartRoom(room) =>
       currentRoom = room
@@ -20,8 +26,9 @@ class NPC(name: String) extends Actor {
       //finds a random room for NPC to go to and schedules NPC to move in the future
       val randomRoomChooser = r.nextDouble() * 4
       currentRoom ! Room.GetExit((randomRoomChooser).toInt)
-      Main.activityManager ! ActivityManager.Enqueue(10, ScheduleMove)
-    case ScheduleMove => Main.activityManager ! ActivityManager.Enqueue(10, MoveNPC)
-    case _ =>
+      Main.activityManager ! ActivityManager.Enqueue(300, MoveNPC)
+    case Print(_) => 
+    case m => println("unhandled message in NPC" + m)
+   
   }
 }
