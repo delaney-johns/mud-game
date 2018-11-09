@@ -35,8 +35,8 @@ class RoomManager extends Actor {
     val desc = lines.next()
     val exits = lines.next().split(",")
     val items = List.fill(lines.next().trim.toInt) {
-      val Array(name, desc) = lines.next().split(",", 2)
-      Item(name.trim, desc.trim)
+      val Array(name, desc, damage, speed) = lines.next().split(",", 4)
+      Item(name.trim, desc.trim, damage.trim.toInt, speed.trim.toInt)
 
     }
     keyword -> context.actorOf(Props(new Room(keyword, name, desc, exits, items)), keyword)

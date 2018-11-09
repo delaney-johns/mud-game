@@ -4,10 +4,11 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import scala.util.Random
 
-class NPC(name: String) extends Actor {
+class NPC(name: String, health: Int) extends Actor {
   import Character._
   private var currentRoom: ActorRef = null
   val r = new Random()
+
   
   Main.activityManager ! ActivityManager.Enqueue(300, MoveNPC)
   def receive = {

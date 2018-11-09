@@ -81,6 +81,7 @@ class Room(
       ret
     } else None
   }
+  
 
   //Item is added to the room.
   def dropItem(item: Item): Unit = {

@@ -11,6 +11,10 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
   //Sets initial room location and inventory.
   private var inventory = new DLListBuffer[Item]()
   private var currentRoom: ActorRef = null
+  private var equippedItem: Item = null
+  
+  //private var?
+  private var hasEquippedItem = false
 
   import Character._
   def receive = {
@@ -24,8 +28,7 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
       ps.println("exit - leave the game")
       ps.println("help - print the available commands and what they do.")
       ps.println("say message - tell everyone in your room something")
-      ps.println("tell user message - tell anyone in the game something")
-
+      ps.println("tell user message - tell anyone in the game something\n")
     case GetStartRoom(room) =>
       currentRoom = room
       currentRoom ! Room.PlayerEntersRoom(self)
@@ -66,6 +69,7 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
       case "look" => currentRoom ! Room.GetDescription
       case "inv" => ps.println(inventoryListing())
       case s if s.startsWith("get") => currentRoom ! Room.GetItem(command.substring(4))
+      case s if s.startsWith("equip") => equipItem(command.substring(6))
       case s if s.startsWith("drop") => addItemToRoom(dropItem(command.substring(5)))
       case "exit" => ps.println("Leave the game.")
       case "help" =>
@@ -99,11 +103,11 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
 
   //Shows items in an inventory, if any.
   def inventoryListing(): String = {
-    if (inventory.isEmpty) "Inventory:\nNone"
+    if (inventory.isEmpty) "Inventory:\nNone \n"
     else {
       var inventoryDesc = ""
       for (items <- inventory)
-        inventoryDesc += items.name + " - " + items.desc + "\n"
+        inventoryDesc += items.name + " - " + items.desc + "It has damage of " + items.damage + " and speed of " + items.speed + "\n"
       "Inventory: \n" + inventoryDesc
     }
   }
@@ -115,7 +119,6 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
     if (indexOfItem > -1) {
       val ret = Some(inventory(indexOfItem))
       inventory.remove(indexOfItem)
-      //inventory = inventory.patch(indexOfItem, Nil, 1)
       ret
     } else None
   }
@@ -134,7 +137,30 @@ class Player(name: String, sock: ServerSocket, br: BufferedReader, ps: PrintStre
     val direction = directionArray.indexOf(dir)
     currentRoom ! Room.GetExit(direction)
   }
-
+  
+    def equipItem(itemName: String): Option[Item] = {
+    if (inventory.exists(itemName => true)) {
+      val indexOfItem = inventory.indexWhere(_.name == itemName)
+      val ret = Some(inventory(indexOfItem))
+      inventory.remove(indexOfItem)
+      ret
+    } else None
+  }
+ 
+//  def eqdduipItem(item: Item): Unit = {
+//    if (hasEquippedItem == false) {
+//      
+//     equippedItem = item
+//     //should equiped item be an item or string?
+//     println(
+//      
+//    }
+  
+//equip: -take item from inventory to equip. can only be one item.
+  //know item's damage rate (somewhat random)
+  //know item's speed
+  
+  
 }
 
 object Character {

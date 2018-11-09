@@ -4,17 +4,17 @@ Backyard porch
 It's a rainy day.
 Garden, -1, -1,Inside, -1, -1
 1
-A photo of Bob Ross, How inspirational.
+a photo of Bob Ross, How inspirational., 0, 0
 Inside
 Inside
 Your family waits for you at the dining table.
 -1, -1,Porch, -1, -1, -1
 1
-A coin, Shiny!
+a coin, Shiny!, 0, 0
 Garden
 Garden
 Lots of flowers in geometric shapes.
 -1,Porch, -1, -1, -1, -1
 1
-A stick, Brown and sticky.
+a stick, Brown and sticky., 3, 75
 

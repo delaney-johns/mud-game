@@ -16,9 +16,7 @@ class PlayerManager extends Actor {
       val p = context.actorOf(Props(new Player(player, sock, br, ps)), player)
       p ! Character.RequestStartRoom
       p ! Character.Intro
-    //player size one
     case Refresh => context.children.foreach(p => p ! Character.CheckInput)
-    //player size zero again
     case TellOneUser(playerName, message) =>
       context.children.filter(_.path.name == playerName).foreach(_ ! Character.Print(sender.path.name + " said " + message))
     case _ =>
