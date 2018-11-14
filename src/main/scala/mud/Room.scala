@@ -16,22 +16,24 @@ class Room(
 
   import Room._
   def receive = {
+    case CheckIfCharacterIsInRoom(killer, victim) => 
+        sender ! Characters.CheckIfCharacterIsInRoomResponse(playerList.find(_.path.name == victim))
     case GetExit(dir) =>
-      sender ! Character.TakeExit(getExit(dir))
+      sender ! Characters.TakeExit(getExit(dir))
       playerList.filter(_ != sender)
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
     case GetDescription =>
-      sender ! Character.Print(description())
+      sender ! Characters.Print(description())
     case DropItem(item) => dropItem(item)
-    case GetItem(itemName) => sender ! Character.ReceiveItem(getItem(itemName))
+    case GetItem(itemName) => sender ! Characters.ReceiveItem(getItem(itemName))
     case PlayerEntersRoom(player) => 
-      playerList.foreach(_ ! Character.Print(player.path.name + " has arrived!"))
+      playerList.foreach(_ ! Characters.Print(player.path.name + " has arrived!"))
       playerList ::= player
     case PlayerExitsRoom(player) => playerList = playerList.filter(_ != player)
-     playerList.foreach(_ ! Character.Print(player.path.name + " has left!"))
+     playerList.foreach(_ ! Characters.Print(player.path.name + " has left!"))
     case TellEveryoneInRoom(message) => 
-      playerList.filter(_ != sender).foreach(_ ! Character.Print(sender.path.name + " said " + message))
+      playerList.filter(_ != sender).foreach(_ ! Characters.Print(sender.path.name + " said " + message))
     case _ =>
   }
 
@@ -68,7 +70,7 @@ class Room(
 
   //Creates a string with the name, description, items, and exits for the current room.
   def description(): String = {
-    name + "\n" + desc + "\n" + "Items: " + printList + "\n" + "Exits: " + printExits + "\n" + "Players here: " + playerList.map(_.path.name).mkString(", ") + "\n"
+    "\n" + name + "\n" + desc + "\n" + "Items: " + printList + "\n"   + "Exits: " + printExits + "\n" + "Players here: " + playerList.map(_.path.name).mkString(", ") + "\n"
   }
 
   //Pulls an item from a room (if it is in the room) and returns it.
@@ -81,7 +83,6 @@ class Room(
       ret
     } else None
   }
-  
 
   //Item is added to the room.
   def dropItem(item: Item): Unit = {
@@ -98,9 +99,8 @@ object Room {
   case class PlayerEntersRoom(player: ActorRef)
   case class PlayerExitsRoom(player: ActorRef)
   case class TellEveryoneInRoom(message: String)
-
+  case class CheckIfCharacterIsInRoom(killer: ActorRef, victim: String)
 
   //Messages sent by RoomManager
   case class LinkExits(rooms: Map[String, ActorRef])
-
 }

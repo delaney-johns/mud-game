@@ -33,7 +33,7 @@ object Main extends App {
       val br = new BufferedReader(new InputStreamReader(sock.getInputStream))
       ps.println("What is your name?")
       val name = br.readLine()
-      playerManager ! PlayerManager.AddNewPlayer(name, ss, br, ps)
+      playerManager ! PlayerManager.AddNewPlayer(name, sock, br, ps)
     }
   }
 

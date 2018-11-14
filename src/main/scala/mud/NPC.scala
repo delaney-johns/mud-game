@@ -5,8 +5,9 @@ import akka.actor.ActorRef
 import scala.util.Random
 
 class NPC(name: String, health: Int) extends Actor {
-  import Character._
+  import Characters._
   private var currentRoom: ActorRef = null
+  private var health = 80
   val r = new Random()
 
   
