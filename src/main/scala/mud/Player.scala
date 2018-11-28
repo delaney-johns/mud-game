@@ -20,7 +20,7 @@ class Player(name: String, sock: Socket, br: BufferedReader, ps: PrintStream) ex
   private var health = 100
   private var isDead = false
   private var victim: ActorRef = null
-  
+
   //Used to randomize damage during combat
   val r = new Random()
   private def randomAddingOrSubtractingDamage = r.nextInt(equippedItem.damage / 2) + 1
@@ -125,6 +125,8 @@ class Player(name: String, sock: Socket, br: BufferedReader, ps: PrintStream) ex
       case s if s.startsWith("equip") => equipItem(command.substring(6))
       case s if s.startsWith("get") => currentRoom ! Room.GetItem(command.substring(4))
       case s if s.startsWith("kill") => currentRoom ! Room.CheckIfCharacterIsInRoom(self, command.substring(5))
+      case s if s.startsWith("shortestPath") => Main.roomManager ! RoomManager.FindShortestPath(currentRoom.path.name, command.substring(13))
+
       case s if s.startsWith("unequip") => unequipItem()
       case "exit" =>
         ps.println("\nThanks for playing!")
@@ -210,8 +212,9 @@ class Player(name: String, sock: Socket, br: BufferedReader, ps: PrintStream) ex
   }
 
   def unequipItem(): Unit = {
-      inventory += _equippedItem
-      _equippedItem = null
+    inventory += _equippedItem
+    _equippedItem = null
   }
+
 }
 
