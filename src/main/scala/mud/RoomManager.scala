@@ -33,7 +33,7 @@ class RoomManager extends Actor {
 
   //File of the map is used to determine number of room,
   //name and description of room, possible exits, and items.
-  //Map is created with room name and info.
+  //BSTMap is created with keyword and exit info.
   def readRoom(lines: Iterator[String]): (String, ActorRef) = {
     val keyword = lines.next()
     val name = lines.next()

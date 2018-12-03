@@ -23,7 +23,6 @@ class Room(
       playerList.filter(_ != sender)
     case LinkExits(rooms) =>
       exits = exitKeys.map(key => rooms.get(key))
-      
     case GetDescription =>
       sender ! Characters.Print(description())
     case DropItem(item) => dropItem(item)

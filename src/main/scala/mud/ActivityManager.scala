@@ -8,7 +8,7 @@ class ActivityManager extends Actor {
 
   //priority queue adds activities and evaluates based on what must happen first (shortest time)
   private var counter = 0
-  private var priorityQueue = new UnsortLLPriorityQueue[Activity]((a, b) => a.time < b.time)
+  private var priorityQueue = new BinaryHeap[Activity]((a, b) => a.time < b.time)
   def receive = {
     case CheckInput =>     
       counter += 1
